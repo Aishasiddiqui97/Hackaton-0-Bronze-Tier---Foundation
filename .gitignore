@@ -1,6 +1,9 @@
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+.Python
 .env
 .venv
 env/
@@ -8,6 +11,11 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+*.egg-info/
+dist/
+build/
+
+# Credentials and tokens
 token.json
 credentials.json
 sent_emails.json
@@ -15,7 +23,13 @@ processed_ids.json
 linkedin_processed.json
 whatsapp_processed.json
 whatsapp_inbound.json
+
+# Logs
+*.log
 logs/*.log
+Logs/*.log*
+
+# Vault task files (keep structure, ignore content)
 AI_Employee_Vault/Inbox/*.md
 AI_Employee_Vault/Plans/*.md
 AI_Employee_Vault/Done/*.md
@@ -24,3 +38,19 @@ AI_Employee_Vault/Needs_Action/*.md
 !AI_Employee_Vault/Plans/.gitkeep
 !AI_Employee_Vault/Done/.gitkeep
 !AI_Employee_Vault/Needs_Action/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+.cache/
