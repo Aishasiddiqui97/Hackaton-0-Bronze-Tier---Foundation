@@ -1,1 +1,31 @@
-watchdog==4.0.0
+# Core Dependencies
+python-dotenv==1.0.0
+requests==2.32.5
+
+# Selenium for LinkedIn Automation
+selenium==4.41.0
+webdriver-manager==4.0.2
+
+# Odoo Integration
+xmlrpc==1.0.1
+
+# Social Media APIs
+tweepy==4.14.0
+facebook-sdk==3.1.0
+
+# Image Processing (Instagram)
+Pillow==10.2.0
+
+# Playwright (Alternative Browser Automation)
+playwright==1.41.0
+
+# Data Processing
+pandas==2.2.0
+
+# Utilities
+pathlib==1.0.1
+certifi==2026.2.25
+
+# Optional: Advanced Features
+# anthropic==0.18.0  # For AI-generated content
+# schedule==1.2.0    # For advanced scheduling

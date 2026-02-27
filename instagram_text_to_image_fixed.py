@@ -1,0 +1,218 @@
+#!/usr/bin/env python3
+"""
+Instagram Text-to-Image Poster - Fixed for Windows Console
+Converts text posts to images and posts to Instagram
+"""
+
+import os
+import requests
+from PIL import Image, ImageDraw, ImageFont
+from pathlib import Path
+from dotenv import load_dotenv
+import textwrap
+import tempfile
+
+load_dotenv()
+
+INSTAGRAM_ACCESS_TOKEN = os.getenv('INSTAGRAM_ACCESS_TOKEN')
+INSTAGRAM_ACCOUNT_ID = os.getenv('INSTAGRAM_ACCOUNT_ID')
+
+def extract_content(filepath):
+    """Extract content from markdown file"""
+    with open(filepath, 'r', encoding='utf-8') as f:
+        content = f.read()
+    
+    lines = content.split('\n')
+    post_lines = []
+    in_content = False
+    
+    for line in lines:
+        if '## Content' in line:
+            in_content = True
+            continue
+        elif line.startswith('##') and in_content:
+            break
+        elif in_content and line.strip() and not line.strip().startswith('#'):
+            post_lines.append(line.strip())
+    
+    # Instagram caption limit: 2200 chars
+    full_content = '\n\n'.join(post_lines)
+    if len(full_content) > 2200:
+        full_content = full_content[:2197] + '...'
+    
+    return full_content
+
+def create_text_image(text, output_path):
+    """Create an image from text content"""
+    try:
+        # Image dimensions (Instagram square format)
+        width, height = 1080, 1080
+        
+        # Create image with gradient background
+        img = Image.new('RGB', (width, height), color='#1a1a1a')
+        draw = ImageDraw.Draw(img)
+        
+        # Create gradient background
+        for y in range(height):
+            color_value = int(26 + (y / height) * 40)  # Gradient from dark to slightly lighter
+            color = (color_value, color_value, color_value + 10)
+            draw.line([(0, y), (width, y)], fill=color)
+        
+        # Try to load a font, fallback to default
+        try:
+            # Try common Windows fonts
+            font_large = ImageFont.truetype("arial.ttf", 48)
+            font_medium = ImageFont.truetype("arial.ttf", 36)
+            font_small = ImageFont.truetype("arial.ttf", 28)
+        except:
+            try:
+                # Try common system fonts
+                font_large = ImageFont.truetype("DejaVuSans.ttf", 48)
+                font_medium = ImageFont.truetype("DejaVuSans.ttf", 36)
+                font_small = ImageFont.truetype("DejaVuSans.ttf", 28)
+            except:
+                # Fallback to default font
+                font_large = ImageFont.load_default()
+                font_medium = ImageFont.load_default()
+                font_small = ImageFont.load_default()
+        
+        # Add company branding at top
+        brand_text = "AI EMPLOYEE SYSTEM"
+        brand_bbox = draw.textbbox((0, 0), brand_text, font=font_medium)
+        brand_width = brand_bbox[2] - brand_bbox[0]
+        draw.text(((width - brand_width) // 2, 50), brand_text, 
+                 fill='#4A90E2', font=font_medium)
+        
+        # Prepare main text
+        # Clean up text for better display
+        clean_text = text.replace('🚀', '').replace('✅', '•').replace('📈', '').strip()
+        
+        # Wrap text to fit image
+        max_chars_per_line = 35
+        wrapped_lines = []
+        
+        for paragraph in clean_text.split('\n\n'):
+            if paragraph.strip():
+                lines = textwrap.wrap(paragraph.strip(), width=max_chars_per_line)
+                wrapped_lines.extend(lines)
+                wrapped_lines.append('')  # Add space between paragraphs
+        
+        # Remove last empty line
+        if wrapped_lines and wrapped_lines[-1] == '':
+            wrapped_lines.pop()
+        
+        # Calculate text positioning
+        line_height = 45
+        total_text_height = len(wrapped_lines) * line_height
+        start_y = (height - total_text_height) // 2
+        
+        # Ensure text fits in image
+        if start_y < 150:
+            start_y = 150
+            # Reduce lines if too many
+            max_lines = (height - 300) // line_height
+            if len(wrapped_lines) > max_lines:
+                wrapped_lines = wrapped_lines[:max_lines-1]
+                wrapped_lines.append('...')
+        
+        # Draw main text
+        current_y = start_y
+        for line in wrapped_lines:
+            if line.strip():
+                # Center each line
+                line_bbox = draw.textbbox((0, 0), line, font=font_small)
+                line_width = line_bbox[2] - line_bbox[0]
+                x = (width - line_width) // 2
+                
+                # Add text shadow for better readability
+                draw.text((x + 2, current_y + 2), line, fill='#000000', font=font_small)
+                draw.text((x, current_y), line, fill='#FFFFFF', font=font_small)
+            
+            current_y += line_height
+        
+        # Add footer
+        footer_text = "Generated by AI Employee • Follow for more insights"
+        footer_bbox = draw.textbbox((0, 0), footer_text, font=font_small)
+        footer_width = footer_bbox[2] - footer_bbox[0]
+        draw.text(((width - footer_width) // 2, height - 100), footer_text, 
+                 fill='#888888', font=font_small)
+        
+        # Add decorative elements
+        # Top border
+        draw.rectangle([(50, 120), (width-50, 125)], fill='#4A90E2')
+        # Bottom border  
+        draw.rectangle([(50, height-140), (width-50, height-135)], fill='#4A90E2')
+        
+        # Save image
+        img.save(output_path, 'JPEG', quality=95)
+        print(f"[SUCCESS] Text image created: {output_path}")
+        return True
+        
+    except Exception as e:
+        print(f"[ERROR] Failed to create image: {e}")
+        return False
+
+def post_to_instagram_with_image(content, image_path):
+    """Post to Instagram with generated image"""
+    
+    if not INSTAGRAM_ACCESS_TOKEN or not INSTAGRAM_ACCOUNT_ID:
+        print("[ERROR] Instagram credentials not found in .env")
+        return False
+    
+    try:
+        print("=" * 60)
+        print("Instagram Image Poster")
+        print("=" * 60)
+        print()
+        
+        print(f"[INFO] Caption ({len(content)} chars):")
+        print("-" * 40)
+        print(content[:200] + "..." if len(content) > 200 else content)
+        print("-" * 40)
+        print()
+        
+        # For now, just simulate posting since we need proper image hosting
+        print("[INFO] SIMULATION MODE (Image hosting needed for live posting)")
+        print(f"[INFO] Image: {image_path}")
+        print(f"[INFO] Caption: Ready")
+        print(f"[INFO] Would post to account: {INSTAGRAM_ACCOUNT_ID}")
+        
+        print("[SUCCESS] Instagram post prepared (simulation)")
+        return True
+            
+    except Exception as e:
+        print(f"[ERROR] Exception: {e}")
+        return False
+
+def main():
+    """Main Instagram posting function"""
+    import sys
+    
+    if len(sys.argv) > 1:
+        filepath = sys.argv[1]
+    else:
+        posted_folder = Path('03_Posted/History')
+        posts = list(posted_folder.glob('*Instagram_Post_*.md'))
+        
+        if not posts:
+            print("[ERROR] No Instagram posts found")
+            return
+        
+        filepath = max(posts, key=lambda p: p.stat().st_mtime)
+        print(f"[INFO] Using: {filepath.name}\n")
+    
+    # Extract content
+    content = extract_content(filepath)
+    
+    # Create image from text
+    image_filename = f"instagram_image_{Path(filepath).stem}.jpg"
+    image_path = Path("temp_images") / image_filename
+    image_path.parent.mkdir(exist_ok=True)
+    
+    if create_text_image(content, image_path):
+        post_to_instagram_with_image(content, image_path)
+    else:
+        print("[ERROR] Failed to create image for Instagram post")
+
+if __name__ == "__main__":
+    main()

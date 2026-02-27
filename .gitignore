@@ -1,43 +1,34 @@
+# Environment Variables
+.env
+*.env
+!.env.template
+
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-.env
-.venv
-env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
 venv/
 ENV/
-env.bak/
-venv.bak/
-*.egg-info/
-dist/
-build/
-
-# Credentials and tokens
-token.json
-credentials.json
-sent_emails.json
-processed_ids.json
-linkedin_processed.json
-whatsapp_processed.json
-whatsapp_inbound.json
-
-# Logs
-*.log
-logs/*.log
-Logs/*.log*
-
-# Vault task files (keep structure, ignore content)
-AI_Employee_Vault/Inbox/*.md
-AI_Employee_Vault/Plans/*.md
-AI_Employee_Vault/Done/*.md
-AI_Employee_Vault/Needs_Action/*.md
-!AI_Employee_Vault/Inbox/.gitkeep
-!AI_Employee_Vault/Plans/.gitkeep
-!AI_Employee_Vault/Done/.gitkeep
-!AI_Employee_Vault/Needs_Action/.gitkeep
+env/
 
 # IDE
 .vscode/
@@ -46,11 +37,52 @@ AI_Employee_Vault/Needs_Action/*.md
 *.swo
 *~
 
+# Logs
+*.log
+logs/
+System_Errors.md
+System_Live_Status.md
+
+# Screenshots
+*.png
+!docs/*.png
+
+# Odoo
+odoo-data/
+postgresql-data/
+
+# Posted Content (keep structure, not content)
+03_Posted/History/POSTED_*.md
+
+# Temporary Files
+*.tmp
+*.temp
+temp/
+
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Temporary files
-*.tmp
+# Credentials
+credentials.json
+token.json
+
+# Browser Data
+.playwright/
+playwright-state/
+
+# Node Modules (if any)
+node_modules/
+
+# Docker
+.docker/
+
+# Backup Files
 *.bak
-.cache/
+*.backup
+
+# Test Files
+test_*.png
+error_*.png
+login_*.png
